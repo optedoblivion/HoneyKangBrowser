@@ -126,7 +126,7 @@ public class BrowserActivity extends TabActivity implements DownloadListener,
             int index = histCount-1;
             int lastIndex = index-1;
             if (index <= 0){
-                closeCurrentTab()
+                closeCurrentTab();
                 return true;
             }
             String url = wvt.urlHistory.get(lastIndex);
