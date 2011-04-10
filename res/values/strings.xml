@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">HoneyKang</string>
+    <string name="search_label" translatable="false">Browser</string>
+    <string name="search_hint">Search or type URL</string>
+    <string name="search_button_text">Go</string>
 </resources>

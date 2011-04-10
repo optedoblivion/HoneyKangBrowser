@@ -2,9 +2,13 @@ package com.honeykang.browser;
 
 import java.util.ArrayList;
 
+import android.app.SearchManager;
 import android.app.TabActivity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -14,6 +18,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.webkit.DownloadListener;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.TabHost;
 
 import com.honeykang.browser.R;
@@ -28,6 +34,8 @@ public class BrowserActivity extends TabActivity implements DownloadListener,
 
     public static TabHost mTabHost = null;
     private static Context mContext = null;
+    private ImageView newTabBtn = null;
+    private HorizontalScrollView mTabWidgetScroller = null;
     private static ArrayList<WebViewTab> mTabList = new ArrayList<WebViewTab>();
     private static final int NEW_TAB_ID = Menu.FIRST;
     private static final int CLOSE_TAB_ID = Menu.FIRST + 1;
@@ -40,18 +48,34 @@ public class BrowserActivity extends TabActivity implements DownloadListener,
         setContentView(R.layout.tab_view);
         mContext = this;
         mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+        mTabWidgetScroller = (HorizontalScrollView) findViewById(
+                                                   R.id.tabwidget_scroll_view);
+        newTabBtn = (ImageView) findViewById(R.id.new_tab_btn);
+        newTabBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                newTab("http://www.engadget.com");
+            }
+        });
         /**
          * Create initial tab
          */
-        newTab("http://www.google.com");
+        newTab("http://www.engadget.com");
     }
 
     private void newTab(String url){
+        Log.i(TAG, "starts: " + url.startsWith("http://"));
+        if (!url.startsWith("http://")){
+            url = "http://" + url;
+        }
         WebViewTab initTab = new WebViewTab(mContext);
         initTab.loadUrl(url);
         mTabHost.addTab(initTab.getTabSpec());
         mTabList.add(initTab);
         mTabHost.setCurrentTab(mTabList.size()-1);
+        mTabWidgetScroller.fullScroll(View.FOCUS_RIGHT);
+        mTabWidgetScroller.scrollBy(1000, 0);
+        
     }
 
     private void closeCurrentTab(){
@@ -90,7 +114,7 @@ public class BrowserActivity extends TabActivity implements DownloadListener,
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case NEW_TAB_ID:
-                newTab("http://www.google.com");
+                newTab("http://www.engadget.com");
                 return true;
             case CLOSE_TAB_ID:
                 if (mTabList.size() == 1){
@@ -118,9 +142,35 @@ public class BrowserActivity extends TabActivity implements DownloadListener,
     }
 
     @Override
+    public void onNewIntent(Intent intent){
+        handleSearchIntent(intent);
+    }
+
+    protected boolean handleSearchIntent(Intent intent){
+        if (intent == null) return false;
+
+        String url = null;
+        final String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            Uri data = intent.getData();
+            if (data != null) url = data.toString();
+        } else if (Intent.ACTION_SEARCH.equals(action)
+                || MediaStore.INTENT_ACTION_MEDIA_SEARCH.equals(action)
+                || Intent.ACTION_WEB_SEARCH.equals(action)) {
+            url = intent.getStringExtra(SearchManager.QUERY);
+        }
+        getCurrentTab().loadUrl(url);
+        return true;
+    }
+
+    private WebViewTab getCurrentTab(){
+        return mTabList.get(mTabHost.getCurrentTab());
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK){
-            WebViewTab wvt = mTabList.get(mTabHost.getCurrentTab());
+            WebViewTab wvt = getCurrentTab();
             int histCount = wvt.urlHistory.size();
             Log.i(TAG, "History Count: " + histCount);
             int index = histCount-1;

@@ -21,7 +21,6 @@ import com.honeykang.browser.R;
  */
 public class Tab {
 
-    private static final String TAG = "Tab";
     private static Context mContext = null;
     //public static TabHost mTabHost = null;
     private TabSpec mTabSpec = null;
@@ -95,7 +94,7 @@ public class Tab {
     }
 
     /**
-     * Provides inital tab setup
+     * Provides initial tab setup
      * 
      * @param tag <code>String</code>
      */

@@ -13,6 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="25dip"
         android:maxWidth="100dip"
+        android:minWidth="80dip"
         android:text="Title"
         android:textColor="@drawable/tab_text_selector"
         android:textSize="15dip"/>

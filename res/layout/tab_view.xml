@@ -16,18 +16,34 @@
         <LinearLayout android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
-            <ScrollView
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/tabwidget_scroll_view"
-                android:scrollbars="horizontal"
-                android:fadeScrollbars="true"
+            <LinearLayout
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
-                <TabWidget
-                    android:id="@android:id/tabs"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <HorizontalScrollView
+                    android:id="@+id/tabwidget_scroll_view"
+                    android:scrollbars="none"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </ScrollView>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="0dip"
+                    android:layout_margin="0dip">
+                    <TabWidget
+                        android:id="@android:id/tabs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </HorizontalScrollView>
+                <ImageView
+                    android:id="@+id/new_tab_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:minWidth="80dip"
+                    android:padding="0dip"
+                    android:layout_margin="0dip"
+                    android:layout_weight="0.1"
+                    android:background="@drawable/browsertab_add"
+                    android:src="@android:drawable/ic_input_add"/>
+            </LinearLayout>
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="fill_parent"
