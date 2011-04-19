@@ -1,8 +1,10 @@
+/**
+ * Teamdouche
+ */
 package com.honeykang.browser.tab;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
@@ -26,6 +28,11 @@ import android.widget.TabHost.TabContentFactory;
 import com.honeykang.browser.BrowserActivity;
 import com.honeykang.browser.R;
 
+/**
+ * WebViewTab.java
+ * 
+ * @author optedoblivion
+ */
 public class WebViewTab extends Tab {
 
     private static final String TAG = "WebViewTab";
@@ -57,9 +64,10 @@ public class WebViewTab extends Tab {
     }
 
     protected void setFavicon(Bitmap favicon){
-        // TODO: Make this the image in the left side of the TextView
-        // Need a custom edit text class
-        mFavicon.setImageBitmap(favicon);
+        if (favicon != null){
+            mFavicon.setImageBitmap(favicon);
+         // TODO: Update bookmark Favicon
+        }
     }
 
     protected boolean isNetworkUp(){
@@ -118,10 +126,7 @@ public class WebViewTab extends Tab {
                 // TODO: removeMessages() ??
                 // TODO: Touch Icon Loader ??
                 // TODO: Error Console
-                if (favicon != null){
-                    setFavicon(favicon);
-                    // TODO: Update bookmark Favicon
-                }
+                setFavicon(favicon);
                 CookieSyncManager.getInstance().resetSync();
                 if (isNetworkUp()){
                     view.setNetworkAvailable(false);
@@ -143,6 +148,7 @@ public class WebViewTab extends Tab {
             @Override
             public void onPageFinished (WebView view, String url) {
                 String title = view.getTitle();
+                setFavicon(view.getFavicon());
                 if (title != null){
                     if (title.length() > 12){
                         title = title.substring(0, 12);

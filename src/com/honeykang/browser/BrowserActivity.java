@@ -1,3 +1,6 @@
+/**
+ * Teamdouche
+ */
 package com.honeykang.browser;
 
 import java.util.ArrayList;
@@ -25,18 +28,23 @@ import android.widget.TabHost;
 import com.honeykang.browser.R;
 import com.honeykang.browser.tab.WebViewTab;
 
+/**
+ * BrowserActivity.java
+ * 
+ * The main activity
+ * 
+ * @author Martin Brabham
+ */
 public class BrowserActivity extends TabActivity implements DownloadListener,
-                        View.OnCreateContextMenuListener {
+                                             View.OnCreateContextMenuListener {
 
     private final static String TAG = "BrowserActivity";
-    private final static boolean DEBUG =
-                                       com.honeykang.browser.Browser.DEBUG;
 
     public static TabHost mTabHost = null;
     private static Context mContext = null;
     private ImageView newTabBtn = null;
     private HorizontalScrollView mTabWidgetScroller = null;
-    private static ArrayList<WebViewTab> mTabList = new ArrayList<WebViewTab>();
+    private static ArrayList<WebViewTab> mTabList =new ArrayList<WebViewTab>();
     private static final int NEW_TAB_ID = Menu.FIRST;
     private static final int CLOSE_TAB_ID = Menu.FIRST + 1;
 
@@ -74,8 +82,6 @@ public class BrowserActivity extends TabActivity implements DownloadListener,
         mTabList.add(initTab);
         mTabHost.setCurrentTab(mTabList.size()-1);
         mTabWidgetScroller.fullScroll(View.FOCUS_RIGHT);
-        mTabWidgetScroller.scrollBy(1000, 0);
-        
     }
 
     private void closeCurrentTab(){
