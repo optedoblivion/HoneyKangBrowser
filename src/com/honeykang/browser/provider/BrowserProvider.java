@@ -55,7 +55,7 @@ public class BrowserProvider extends ContentProvider {
      * Suggest Projection
      */
     private static final String[] SUGGEST_PROJECTION = new String[] {
-        "_id", "url", "title", "bookmark", "user_entered"
+        "_id", "url", "title"
     };
 
     /**
@@ -63,7 +63,7 @@ public class BrowserProvider extends ContentProvider {
      */
     private static final String SUGGEST_SELECTION =
         "(url LIKE ? OR url LIKE ? OR url LIKE ? OR url LIKE ?"
-            + " OR title LIKE ?) AND (bookmark = 1 OR user_entered = 1)";
+            + " OR title LIKE ?)";// AND user_entered = 1";
 
     /**
      * Order By
@@ -117,8 +117,7 @@ public class BrowserProvider extends ContentProvider {
         + "description TEXT,"
         + "favicon BLOB DEFAULT NULL,"
         + "thumbnail BLOB DEFAULT NULL,"
-        + "touch_icon BLOB DEFAULT NULL,"
-        + "user_entered INTEGER"
+        + "touch_icon BLOB DEFAULT NULL"
         + " ) ";
 
     /**
@@ -136,8 +135,7 @@ public class BrowserProvider extends ContentProvider {
         + "description TEXT,"
         + "favicon BLOB DEFAULT NULL,"
         + "thumbnail BLOB DEFAULT NULL,"
-        + "touch_icon BLOB DEFAULT NULL,"
-        + "user_entered INTEGER"
+        + "touch_icon BLOB DEFAULT NULL"
         + " ) ";
 
     /**
@@ -171,6 +169,14 @@ public class BrowserProvider extends ContentProvider {
             try {
                 db.execSQL(CREATE_HISTORY_TABLE_SQL);
                 db.execSQL(CREATE_BOOKMARK_TABLE_SQL);
+                db.execSQL(
+                        "INSERT INTO "
+                        + HISTORY_TABLE
+                        + " (title, url, visits, date, created, description "
+                        + " ) VALUES "
+                        + " ( 'CyanogenMod', 'http://www.cyanogenmod.com', "
+                        + " 1, 0, 0, 'Android and Bacon')"
+                );
             } catch (Exception e){
                 Log.e(TAG, e.toString());
                 if (Constants.DEBUG){
@@ -223,7 +229,7 @@ public class BrowserProvider extends ContentProvider {
                 count = db.delete(BOOKMARK_TABLE, whereClause, whereArgs);
                 break;
             default:
-                break;
+                throw new IllegalArgumentException("Unkown URI " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return count;
@@ -255,10 +261,27 @@ public class BrowserProvider extends ContentProvider {
         Uri tableUri = null;
         switch(sUriMatcher.match(uri)){
             case HISTORY_ID:
-                rowId = db.insert(HISTORY_TABLE, null, values);
+                String[] columns = {"_id", "visits"};
+                String selection = "url = ?";
+                String[] selectionArgs = {values.getAsString("url")};
+                Cursor result = db.query(HISTORY_TABLE, columns, selection,
+                                              selectionArgs, null, null, null);
+                result.moveToFirst();
+                if (result.getCount() > 0){
+                    rowId = result.getLong(result.getColumnIndex("_id"));
+                    ContentValues newVals = new ContentValues();
+                    newVals.put("visits", result.getInt(
+                                             result.getColumnIndex("visits")));
+                    String[] whereArgs = {String.valueOf(rowId)};
+                    db.update(HISTORY_TABLE, newVals, "_id = ?", whereArgs);
+                } else {
+                    rowId = db.insert(HISTORY_TABLE, null, values);
+                }
+                tableUri = HISTORY_URI;
                 break;
             case BOOKMARK_ID:
                 rowId = db.insert(BOOKMARK_TABLE, null, values);
+                tableUri = BOOKMARK_URI;
                 break;
             default:
                 throw new IllegalArgumentException("Unkown URI " + uri);
@@ -291,6 +314,7 @@ public class BrowserProvider extends ContentProvider {
                 if (selectionArgs[0] == null || selectionArgs[0].equals("")) {
                     suggestSelection = null;
                     myArgs = null;
+                    Log.i(TAG, "Selection is empty");
                 } else {
                     String like = selectionArgs[0] + "%";
                     if (selectionArgs[0].startsWith("http")
@@ -298,6 +322,7 @@ public class BrowserProvider extends ContentProvider {
                         myArgs = new String[1];
                         myArgs[0] = like;
                         suggestSelection = selection;
+                        Log.i(TAG, "Selection is URL");
                     } else {
                         SUGGEST_ARGS[0] = "http://" + like;
                         SUGGEST_ARGS[1] = "http://www." + like;
@@ -307,10 +332,11 @@ public class BrowserProvider extends ContentProvider {
                         SUGGEST_ARGS[4] = like;
                         myArgs = SUGGEST_ARGS;
                         suggestSelection = SUGGEST_SELECTION;
+                        Log.i(TAG, "Selection is keyword");
                     }
                 }
                 cursor = db.query(HISTORY_TABLE, SUGGEST_PROJECTION,
-                        suggestSelection, selectionArgs, null, null, ORDER_BY);
+                        suggestSelection, myArgs, null, null, ORDER_BY);
                 break;
             default:
                 throw new IllegalArgumentException("Unkown URI " + uri);
